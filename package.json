@@ -1,0 +1,15 @@
+{
+  "name": "ai-code-reviewer",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/shared",
+    "packages/mcp-server",
+    "packages/extension"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "clean": "rm -rf packages/*/dist",
+    "test": "npm run test --workspaces --if-present"
+  }
+}

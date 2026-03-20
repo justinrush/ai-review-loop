@@ -1,0 +1,143 @@
+{
+  "name": "ai-code-reviewer",
+  "displayName": "AI Code Reviewer",
+  "description": "GitLab-MR-style code review for AI-generated commits",
+  "version": "0.1.0",
+  "publisher": "ai-code-reviewer",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "workspaceContains:.git"
+  ],
+  "main": "./dist/extension.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "vscode:prepublish": "npm run build"
+  },
+  "dependencies": {
+    "@ai-code-reviewer/shared": "*",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.95.0",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.7.0"
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ai-code-review",
+          "title": "AI Code Review",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ai-code-review": [
+        {
+          "id": "aiCodeReview.commits",
+          "name": "Commits"
+        },
+        {
+          "id": "aiCodeReview.files",
+          "name": "Changed Files"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "aiCodeReview.startSession",
+        "title": "Start Review Session",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.submitReview",
+        "title": "Submit Review",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.reReview",
+        "title": "Re-review (After Rebase)",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.refreshCommits",
+        "title": "Refresh",
+        "icon": "$(refresh)",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.addComment",
+        "title": "Add Review Comment",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.setBaseBranch",
+        "title": "Set Base Branch",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.createComment",
+        "title": "Save Comment",
+        "category": "AI Code Review",
+        "enablement": "!commentIsEmpty"
+      },
+      {
+        "command": "aiCodeReview.resolveComment",
+        "title": "Resolve",
+        "category": "AI Code Review"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "aiCodeReview.refreshCommits",
+          "when": "view == aiCodeReview.commits",
+          "group": "navigation"
+        }
+      ],
+      "editor/lineNumber/context": [
+        {
+          "command": "aiCodeReview.addComment",
+          "when": "resourceScheme == ai-review"
+        }
+      ],
+      "comments/commentThread/comment": [
+        {
+          "command": "aiCodeReview.createComment",
+          "group": "inline",
+          "when": "commentController == aiReview"
+        }
+      ],
+      "comments/commentThread/context": [
+        {
+          "command": "aiCodeReview.resolveComment",
+          "group": "inline",
+          "when": "commentController == aiReview"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "aiCodeReview.addComment",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "editorTextFocus && resourceScheme == ai-review"
+      }
+    ],
+    "configuration": {
+      "title": "AI Code Review",
+      "properties": {
+        "aiCodeReview.baseBranch": {
+          "type": "string",
+          "default": "main",
+          "description": "The base branch to compare against (e.g. main, master, develop)"
+        }
+      }
+    }
+  }
+}
