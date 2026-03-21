@@ -60,16 +60,19 @@
       {
         "command": "aiCodeReview.startSession",
         "title": "Start Review Session",
+        "icon": "$(play)",
         "category": "AI Code Review"
       },
       {
         "command": "aiCodeReview.submitReview",
         "title": "Submit Review",
+        "icon": "$(check)",
         "category": "AI Code Review"
       },
       {
         "command": "aiCodeReview.reReview",
         "title": "Re-review (After Rebase)",
+        "icon": "$(sync)",
         "category": "AI Code Review"
       },
       {
@@ -103,9 +106,24 @@
     "menus": {
       "view/title": [
         {
+          "command": "aiCodeReview.startSession",
+          "when": "view == aiCodeReview.commits && !aiCodeReview.hasActiveSession",
+          "group": "navigation@1"
+        },
+        {
+          "command": "aiCodeReview.submitReview",
+          "when": "view == aiCodeReview.commits && aiCodeReview.hasActiveSession",
+          "group": "navigation@1"
+        },
+        {
+          "command": "aiCodeReview.reReview",
+          "when": "view == aiCodeReview.commits && aiCodeReview.hasActiveSession",
+          "group": "navigation@2"
+        },
+        {
           "command": "aiCodeReview.refreshCommits",
           "when": "view == aiCodeReview.commits",
-          "group": "navigation"
+          "group": "navigation@3"
         }
       ],
       "editor/lineNumber/context": [

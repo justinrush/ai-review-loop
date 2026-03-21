@@ -114,6 +114,7 @@ export async function activate(
         const session = await sessionManager.startSession();
         if (session) {
           commentController.setActiveSessionId(session.id);
+          vscode.commands.executeCommand("setContext", "aiCodeReview.hasActiveSession", true);
           await commitsTree.refresh();
         }
       }
@@ -121,7 +122,10 @@ export async function activate(
 
     vscode.commands.registerCommand(
       "aiCodeReview.submitReview",
-      () => sessionManager.submitReview()
+      async () => {
+        await sessionManager.submitReview();
+        vscode.commands.executeCommand("setContext", "aiCodeReview.hasActiveSession", false);
+      }
     ),
 
     vscode.commands.registerCommand(
@@ -131,6 +135,7 @@ export async function activate(
         if (session) {
           commentController.clearThreads();
           commentController.setActiveSessionId(session.id);
+          vscode.commands.executeCommand("setContext", "aiCodeReview.hasActiveSession", true);
           await commitsTree.refresh();
         }
       }
@@ -188,6 +193,7 @@ export async function activate(
   const activeSession = await sessionManager.getActiveSession();
   if (activeSession) {
     commentController.setActiveSessionId(activeSession.id);
+    vscode.commands.executeCommand("setContext", "aiCodeReview.hasActiveSession", true);
   }
 
   context.subscriptions.push(
