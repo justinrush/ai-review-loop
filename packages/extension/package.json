@@ -4,27 +4,35 @@
   "description": "GitLab-MR-style code review for AI-generated commits",
   "version": "0.1.0",
   "publisher": "ai-code-reviewer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/justinrush/ai-code-reviewer"
+  },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.95.0"
   },
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "activationEvents": [
     "workspaceContains:.git"
   ],
   "main": "./dist/extension.js",
   "scripts": {
-    "build": "tsc",
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
     "watch": "tsc -w",
-    "vscode:prepublish": "npm run build"
-  },
-  "dependencies": {
-    "@ai-code-reviewer/shared": "*",
-    "uuid": "^11.1.0"
+    "package": "vsce package --no-dependencies",
+    "vscode:prepublish": "cd ../.. && npm run build -w packages/shared && cd packages/extension && npm run build"
   },
   "devDependencies": {
-    "@types/vscode": "^1.95.0",
+    "@ai-code-reviewer/shared": "*",
     "@types/uuid": "^10.0.0",
-    "typescript": "^5.7.0"
+    "@types/vscode": "^1.95.0",
+    "@vscode/vsce": "^3.7.1",
+    "esbuild": "^0.27.4",
+    "typescript": "^5.7.0",
+    "uuid": "^11.1.0"
   },
   "contributes": {
     "viewsContainers": {
@@ -115,9 +123,14 @@
       ],
       "comments/commentThread/context": [
         {
+          "command": "aiCodeReview.createComment",
+          "group": "inline",
+          "when": "commentController == aiReview && commentThreadIsEmpty"
+        },
+        {
           "command": "aiCodeReview.resolveComment",
           "group": "inline",
-          "when": "commentController == aiReview"
+          "when": "commentController == aiReview && !commentThreadIsEmpty"
         }
       ]
     },

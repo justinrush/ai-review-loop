@@ -38,9 +38,11 @@ Press **F5** in VS Code (with this repo open) to launch an Extension Development
 
 ```bash
 cd packages/extension
-npx vsce package
+npm run package
 code --install-extension ai-code-reviewer-0.1.0.vsix
 ```
+
+> **Note:** The extension uses esbuild to bundle everything into a single file. The `package` script passes `--no-dependencies` to `vsce` because npm workspaces cause `vsce` to traverse symlinks outside the package directory.
 
 ### Connect the MCP Server to Your AI Agent
 
