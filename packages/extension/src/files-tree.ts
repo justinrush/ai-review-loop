@@ -1,10 +1,16 @@
 import * as vscode from "vscode";
-import { getChangedFiles, type ChangedFile } from "@ai-code-reviewer/shared";
+import {
+  getChangedFiles,
+  getChangedFilesBetween,
+  type ChangedFile,
+} from "@ai-code-reviewer/shared";
 import type { CommitItem } from "./commits-tree.js";
 
 export interface FileItem {
   file: ChangedFile;
   commitSha: string;
+  /** When set, use this as the left side of the diff instead of the commit's parent */
+  parentRef?: string;
 }
 
 export class FilesTreeProvider implements vscode.TreeDataProvider<FileItem> {
@@ -20,8 +26,21 @@ export class FilesTreeProvider implements vscode.TreeDataProvider<FileItem> {
 
   async showCommit(commit: CommitItem): Promise<void> {
     try {
-      const changed = await getChangedFiles(this.repoRoot, commit.sha);
-      this.files = changed.map((f) => ({ file: f, commitSha: commit.sha }));
+      if (commit.isBranchOverview && commit.mergeBase) {
+        const changed = await getChangedFilesBetween(
+          this.repoRoot,
+          commit.mergeBase,
+          "HEAD"
+        );
+        this.files = changed.map((f) => ({
+          file: f,
+          commitSha: commit.sha,
+          parentRef: commit.mergeBase,
+        }));
+      } else {
+        const changed = await getChangedFiles(this.repoRoot, commit.sha);
+        this.files = changed.map((f) => ({ file: f, commitSha: commit.sha }));
+      }
     } catch {
       this.files = [];
     }

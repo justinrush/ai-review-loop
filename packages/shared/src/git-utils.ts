@@ -64,6 +64,26 @@ export async function getChangedFiles(
   });
 }
 
+export async function getChangedFilesBetween(
+  cwd: string,
+  base: string,
+  head: string
+): Promise<ChangedFile[]> {
+  const output = await git(
+    ["diff", "--name-status", `${base}...${head}`],
+    cwd
+  );
+  if (!output) return [];
+  return output.split("\n").map((line) => {
+    const parts = line.split("\t");
+    const status = parts[0];
+    if (status.startsWith("R") || status.startsWith("C")) {
+      return { status: status[0], oldPath: parts[1], path: parts[2] };
+    }
+    return { status, path: parts[1] };
+  });
+}
+
 export async function getFileAtRef(
   cwd: string,
   ref: string,

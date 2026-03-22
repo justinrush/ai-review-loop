@@ -1,5 +1,8 @@
 import * as vscode from "vscode";
 import {
+  getCurrentBranch,
+  getMergeBase,
+  getCommitsBetween,
   readCommitReview,
   writeCommitReview,
   type ReviewComment,
@@ -153,6 +156,53 @@ export class ReviewCommentController implements vscode.Disposable {
       thread.state = vscode.CommentThreadState.Resolved;
       thread.contextValue = "resolved";
     }
+  }
+
+  async addGeneralComment(baseBranch: string): Promise<void> {
+    if (!this.activeSessionId) {
+      vscode.window.showWarningMessage(
+        "Start a review session before adding comments."
+      );
+      return;
+    }
+
+    const text = await vscode.window.showInputBox({
+      prompt: "Enter your comment",
+      placeHolder: "General feedback for the AI agent...",
+    });
+    if (!text) return;
+
+    // Store on the HEAD commit
+    const branch = await getCurrentBranch(this.repoRoot);
+    const mergeBase = await getMergeBase(this.repoRoot, branch, baseBranch);
+    const commits = await getCommitsBetween(this.repoRoot, mergeBase, "HEAD");
+    if (commits.length === 0) {
+      vscode.window.showWarningMessage("No commits on this branch.");
+      return;
+    }
+    const headSha = commits[commits.length - 1].sha;
+
+    const comment: ReviewComment = {
+      id: uuidv4(),
+      sessionId: this.activeSessionId,
+      commitSha: headSha,
+      filePath: "(general)",
+      startLine: 0,
+      endLine: 0,
+      body: text,
+      status: "open",
+      createdAt: new Date().toISOString(),
+      thread: [
+        {
+          body: text,
+          author: "human",
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    };
+
+    await this.persistComment(headSha, comment);
+    vscode.window.showInformationMessage("General comment added.");
   }
 
   clearThreads(): void {

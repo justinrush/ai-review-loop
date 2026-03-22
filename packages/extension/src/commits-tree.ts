@@ -9,6 +9,10 @@ export interface CommitItem {
   sha: string;
   subject: string;
   date: string;
+  /** Set on the synthetic "Branch Overview" entry */
+  isBranchOverview?: boolean;
+  /** Merge-base SHA, set on the branch overview entry */
+  mergeBase?: string;
 }
 
 export class CommitsTreeProvider
@@ -43,13 +47,25 @@ export class CommitsTreeProvider
         branch,
         this.baseBranch
       );
-      this.commits = await getCommitsBetween(
+      const commits = await getCommitsBetween(
         this.repoRoot,
         mergeBase,
         "HEAD"
       );
       // Reverse to show newest first
-      this.commits.reverse();
+      commits.reverse();
+
+      // Add synthetic "Branch Overview" entry at the top
+      const headSha = commits.length > 0 ? commits[0].sha : mergeBase;
+      const overview: CommitItem = {
+        sha: headSha,
+        subject: `All changes (${commits.length} commits)`,
+        date: "",
+        isBranchOverview: true,
+        mergeBase,
+      };
+
+      this.commits = [overview, ...commits];
     } catch {
       this.commits = [];
     }
@@ -61,6 +77,22 @@ export class CommitsTreeProvider
   }
 
   getTreeItem(element: CommitItem): vscode.TreeItem {
+    if (element.isBranchOverview) {
+      const item = new vscode.TreeItem(
+        element.subject,
+        vscode.TreeItemCollapsibleState.None
+      );
+      item.tooltip = "View all files changed across the entire branch";
+      item.iconPath = new vscode.ThemeIcon("git-merge");
+      item.command = {
+        command: "aiCodeReview.selectCommit",
+        title: "Select Branch Overview",
+        arguments: [element],
+      };
+      item.contextValue = "branchOverview";
+      return item;
+    }
+
     const shortSha = element.sha.slice(0, 7);
     const item = new vscode.TreeItem(
       `${shortSha} ${element.subject}`,

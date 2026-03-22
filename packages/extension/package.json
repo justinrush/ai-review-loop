@@ -53,6 +53,10 @@
         {
           "id": "aiCodeReview.files",
           "name": "Changed Files"
+        },
+        {
+          "id": "aiCodeReview.comments",
+          "name": "Comments"
         }
       ]
     },
@@ -82,8 +86,25 @@
         "category": "AI Code Review"
       },
       {
+        "command": "aiCodeReview.refreshComments",
+        "title": "Refresh Comments",
+        "icon": "$(refresh)",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.openCommentInDiff",
+        "title": "Open in Diff",
+        "category": "AI Code Review"
+      },
+      {
         "command": "aiCodeReview.addComment",
         "title": "Add Review Comment",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.addGeneralComment",
+        "title": "Add General Comment",
+        "icon": "$(comment)",
         "category": "AI Code Review"
       },
       {
@@ -121,9 +142,19 @@
           "group": "navigation@2"
         },
         {
+          "command": "aiCodeReview.addGeneralComment",
+          "when": "view == aiCodeReview.commits && aiCodeReview.hasActiveSession",
+          "group": "navigation@3"
+        },
+        {
           "command": "aiCodeReview.refreshCommits",
           "when": "view == aiCodeReview.commits",
-          "group": "navigation@3"
+          "group": "navigation@4"
+        },
+        {
+          "command": "aiCodeReview.refreshComments",
+          "when": "view == aiCodeReview.comments",
+          "group": "navigation"
         }
       ],
       "editor/lineNumber/context": [

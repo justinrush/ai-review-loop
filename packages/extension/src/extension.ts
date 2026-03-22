@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
-import { getRepoRoot } from "@ai-code-reviewer/shared";
+import { getRepoRoot, getParentCommit } from "@ai-code-reviewer/shared";
 import { CommitsTreeProvider, type CommitItem } from "./commits-tree.js";
 import { FilesTreeProvider, type FileItem } from "./files-tree.js";
+import { CommentsTreeProvider } from "./comments-tree.js";
 import {
   DiffContentProvider,
   SCHEME,
@@ -9,7 +10,7 @@ import {
 } from "./diff-provider.js";
 import { ReviewCommentController } from "./review-comments.js";
 import { ReviewSessionManager } from "./review-session.js";
-import { getParentCommit } from "@ai-code-reviewer/shared";
+import type { ReviewComment } from "@ai-code-reviewer/shared";
 
 export async function activate(
   context: vscode.ExtensionContext
@@ -33,6 +34,7 @@ export async function activate(
   const commitsTree = new CommitsTreeProvider(repoRoot, baseBranch);
   const filesTree = new FilesTreeProvider(repoRoot);
   const diffProvider = new DiffContentProvider(repoRoot);
+  const commentsTree = new CommentsTreeProvider(repoRoot, baseBranch);
   const commentController = new ReviewCommentController(repoRoot);
   const sessionManager = new ReviewSessionManager(repoRoot);
 
@@ -42,6 +44,9 @@ export async function activate(
   });
   const filesView = vscode.window.createTreeView("aiCodeReview.files", {
     treeDataProvider: filesTree,
+  });
+  const commentsView = vscode.window.createTreeView("aiCodeReview.comments", {
+    treeDataProvider: commentsTree,
   });
 
   // Register diff content provider
@@ -55,9 +60,11 @@ export async function activate(
   );
   gitNotesWatcher.onDidChange(() => {
     commitsTree.refresh();
+    commentsTree.refresh();
   });
   gitNotesWatcher.onDidCreate(() => {
     commitsTree.refresh();
+    commentsTree.refresh();
   });
 
   // Track selected commit for file tree
@@ -79,14 +86,18 @@ export async function activate(
         const commitSha = fileItem.commitSha;
         const filePath = fileItem.file.path;
 
-        let parentRef: string;
-        try {
-          parentRef = await getParentCommit(repoRoot, commitSha);
-        } catch {
-          parentRef = "4b825dc642cb6eb9a060e54bf899d69f7cb46719"; // empty tree
+        let leftRef: string;
+        if (fileItem.parentRef) {
+          leftRef = fileItem.parentRef;
+        } else {
+          try {
+            leftRef = await getParentCommit(repoRoot, commitSha);
+          } catch {
+            leftRef = "4b825dc642cb6eb9a060e54bf899d69f7cb46719"; // empty tree
+          }
         }
 
-        const leftUri = makeUri(parentRef, filePath);
+        const leftUri = makeUri(leftRef, filePath);
         const rightUri = makeUri(commitSha, filePath);
         const title = `${filePath} (${commitSha.slice(0, 7)})`;
 
@@ -105,7 +116,44 @@ export async function activate(
 
     vscode.commands.registerCommand(
       "aiCodeReview.refreshCommits",
-      () => commitsTree.refresh()
+      () => {
+        commitsTree.refresh();
+        commentsTree.refresh();
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "aiCodeReview.refreshComments",
+      () => commentsTree.refresh()
+    ),
+
+    vscode.commands.registerCommand(
+      "aiCodeReview.openCommentInDiff",
+      async (comment: ReviewComment) => {
+        const commitSha = comment.commitSha;
+        const filePath = comment.filePath;
+
+        let parentRef: string;
+        try {
+          parentRef = await getParentCommit(repoRoot, commitSha);
+        } catch {
+          parentRef = "4b825dc642cb6eb9a060e54bf899d69f7cb46719";
+        }
+
+        const leftUri = makeUri(parentRef, filePath);
+        const rightUri = makeUri(commitSha, filePath);
+        const title = `${filePath} (${commitSha.slice(0, 7)})`;
+
+        await vscode.commands.executeCommand(
+          "vscode.diff",
+          leftUri,
+          rightUri,
+          title
+        );
+
+        const doc = await vscode.workspace.openTextDocument(rightUri);
+        await commentController.loadCommentsForFile(commitSha, filePath, doc);
+      }
     ),
 
     vscode.commands.registerCommand(
@@ -116,6 +164,7 @@ export async function activate(
           commentController.setActiveSessionId(session.id);
           vscode.commands.executeCommand("setContext", "aiCodeReview.hasActiveSession", true);
           await commitsTree.refresh();
+          await commentsTree.refresh();
         }
       }
     ),
@@ -125,6 +174,7 @@ export async function activate(
       async () => {
         await sessionManager.submitReview();
         vscode.commands.executeCommand("setContext", "aiCodeReview.hasActiveSession", false);
+        await commentsTree.refresh();
       }
     ),
 
@@ -137,6 +187,7 @@ export async function activate(
           commentController.setActiveSessionId(session.id);
           vscode.commands.executeCommand("setContext", "aiCodeReview.hasActiveSession", true);
           await commitsTree.refresh();
+          await commentsTree.refresh();
         }
       }
     ),
@@ -157,6 +208,11 @@ export async function activate(
           "editor.action.addCommentLine"
         );
       }
+    ),
+
+    vscode.commands.registerCommand(
+      "aiCodeReview.addGeneralComment",
+      () => commentController.addGeneralComment(baseBranch)
     ),
 
     vscode.commands.registerCommand(
@@ -195,10 +251,12 @@ export async function activate(
     commentController.setActiveSessionId(activeSession.id);
     vscode.commands.executeCommand("setContext", "aiCodeReview.hasActiveSession", true);
   }
+  await commentsTree.refresh();
 
   context.subscriptions.push(
     commitsView,
     filesView,
+    commentsView,
     commentController,
     gitNotesWatcher
   );
