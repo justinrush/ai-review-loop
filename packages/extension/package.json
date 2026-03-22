@@ -1,0 +1,205 @@
+{
+  "name": "ai-code-reviewer",
+  "displayName": "AI Code Reviewer",
+  "description": "GitLab-MR-style code review for AI-generated commits",
+  "version": "0.1.0",
+  "publisher": "ai-code-reviewer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/justinrush/ai-code-reviewer"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:.git"
+  ],
+  "main": "./dist/extension.js",
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "watch": "tsc -w",
+    "package": "vsce package --no-dependencies",
+    "vscode:prepublish": "cd ../.. && npm run build -w packages/shared && cd packages/extension && npm run build"
+  },
+  "devDependencies": {
+    "@ai-code-reviewer/shared": "*",
+    "@types/uuid": "^10.0.0",
+    "@types/vscode": "^1.95.0",
+    "@vscode/vsce": "^3.7.1",
+    "esbuild": "^0.27.4",
+    "typescript": "^5.7.0",
+    "uuid": "^11.1.0"
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ai-code-review",
+          "title": "AI Code Review",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ai-code-review": [
+        {
+          "id": "aiCodeReview.commits",
+          "name": "Commits"
+        },
+        {
+          "id": "aiCodeReview.files",
+          "name": "Changed Files"
+        },
+        {
+          "id": "aiCodeReview.comments",
+          "name": "Comments"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "aiCodeReview.startSession",
+        "title": "Start Review Session",
+        "icon": "$(play)",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.submitReview",
+        "title": "Submit Review",
+        "icon": "$(check)",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.reReview",
+        "title": "Re-review (After Rebase)",
+        "icon": "$(sync)",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.refreshCommits",
+        "title": "Refresh",
+        "icon": "$(refresh)",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.refreshComments",
+        "title": "Refresh Comments",
+        "icon": "$(refresh)",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.openCommentInDiff",
+        "title": "Open in Diff",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.addComment",
+        "title": "Add Review Comment",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.addGeneralComment",
+        "title": "Add General Comment",
+        "icon": "$(comment)",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.setBaseBranch",
+        "title": "Set Base Branch",
+        "category": "AI Code Review"
+      },
+      {
+        "command": "aiCodeReview.createComment",
+        "title": "Save Comment",
+        "category": "AI Code Review",
+        "enablement": "!commentIsEmpty"
+      },
+      {
+        "command": "aiCodeReview.resolveComment",
+        "title": "Resolve",
+        "category": "AI Code Review"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "aiCodeReview.startSession",
+          "when": "view == aiCodeReview.commits && !aiCodeReview.hasActiveSession",
+          "group": "navigation@1"
+        },
+        {
+          "command": "aiCodeReview.submitReview",
+          "when": "view == aiCodeReview.commits && aiCodeReview.hasActiveSession",
+          "group": "navigation@1"
+        },
+        {
+          "command": "aiCodeReview.reReview",
+          "when": "view == aiCodeReview.commits && aiCodeReview.hasActiveSession",
+          "group": "navigation@2"
+        },
+        {
+          "command": "aiCodeReview.addGeneralComment",
+          "when": "view == aiCodeReview.commits && aiCodeReview.hasActiveSession",
+          "group": "navigation@3"
+        },
+        {
+          "command": "aiCodeReview.refreshCommits",
+          "when": "view == aiCodeReview.commits",
+          "group": "navigation@4"
+        },
+        {
+          "command": "aiCodeReview.refreshComments",
+          "when": "view == aiCodeReview.comments",
+          "group": "navigation"
+        }
+      ],
+      "editor/lineNumber/context": [
+        {
+          "command": "aiCodeReview.addComment",
+          "when": "resourceScheme == ai-review"
+        }
+      ],
+      "comments/commentThread/comment": [
+        {
+          "command": "aiCodeReview.createComment",
+          "group": "inline",
+          "when": "commentController == aiReview"
+        }
+      ],
+      "comments/commentThread/context": [
+        {
+          "command": "aiCodeReview.createComment",
+          "group": "inline",
+          "when": "commentController == aiReview && commentThreadIsEmpty"
+        },
+        {
+          "command": "aiCodeReview.resolveComment",
+          "group": "inline",
+          "when": "commentController == aiReview && !commentThreadIsEmpty"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "aiCodeReview.addComment",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "editorTextFocus && resourceScheme == ai-review"
+      }
+    ],
+    "configuration": {
+      "title": "AI Code Review",
+      "properties": {
+        "aiCodeReview.baseBranch": {
+          "type": "string",
+          "default": "main",
+          "description": "The base branch to compare against (e.g. main, master, develop)"
+        }
+      }
+    }
+  }
+}

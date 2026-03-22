@@ -1,0 +1,18 @@
+{
+  "name": "ai-code-reviewer",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/justinrush/ai-code-reviewer"
+  },
+  "private": true,
+  "workspaces": [
+    "packages/shared",
+    "packages/mcp-server",
+    "packages/extension"
+  ],
+  "scripts": {
+    "build": "npm run build -w packages/shared && npm run build -w packages/mcp-server && npm run build -w packages/extension",
+    "clean": "rm -rf packages/shared/dist packages/mcp-server/dist packages/extension/dist",
+    "test": "npm run test --workspaces --if-present"
+  }
+}
