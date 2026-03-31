@@ -54,18 +54,23 @@ export async function activate(
     vscode.workspace.registerTextDocumentContentProvider(SCHEME, diffProvider)
   );
 
-  // Watch for git notes changes to auto-refresh
+  // Watch for git notes changes to auto-refresh.
+  // Watch both loose refs and packed-refs (git may update either).
+  const refreshAll = () => {
+    commitsTree.refresh();
+    commentsTree.refresh();
+    commentController.refreshThreads();
+  };
   const gitNotesWatcher = vscode.workspace.createFileSystemWatcher(
     new vscode.RelativePattern(repoRoot, ".git/refs/notes/**")
   );
-  gitNotesWatcher.onDidChange(() => {
-    commitsTree.refresh();
-    commentsTree.refresh();
-  });
-  gitNotesWatcher.onDidCreate(() => {
-    commitsTree.refresh();
-    commentsTree.refresh();
-  });
+  const packedRefsWatcher = vscode.workspace.createFileSystemWatcher(
+    new vscode.RelativePattern(repoRoot, ".git/packed-refs")
+  );
+  gitNotesWatcher.onDidChange(refreshAll);
+  gitNotesWatcher.onDidCreate(refreshAll);
+  gitNotesWatcher.onDidDelete(refreshAll);
+  packedRefsWatcher.onDidChange(refreshAll);
 
   // Track selected commit for file tree
   let selectedCommit: CommitItem | null = null;
@@ -241,6 +246,11 @@ export async function activate(
     vscode.commands.registerCommand(
       "aiCodeReview.resolveComment",
       (thread: vscode.CommentThread) => commentController.resolveComment(thread)
+    ),
+
+    vscode.commands.registerCommand(
+      "aiCodeReview.refreshAll",
+      () => refreshAll()
     )
   );
 
@@ -258,7 +268,8 @@ export async function activate(
     filesView,
     commentsView,
     commentController,
-    gitNotesWatcher
+    gitNotesWatcher,
+    packedRefsWatcher
   );
 }
 

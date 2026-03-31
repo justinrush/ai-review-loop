@@ -205,6 +205,48 @@ export class ReviewCommentController implements vscode.Disposable {
     vscode.window.showInformationMessage("General comment added.");
   }
 
+  async refreshThreads(): Promise<void> {
+    // Re-read git notes and update all open comment threads in place
+    // Group threads by commitSha to avoid redundant reads
+    const byCommit = new Map<string, { id: string; thread: vscode.CommentThread }[]>();
+
+    for (const [commentId, thread] of this.threads) {
+      const path = thread.uri.path;
+      const firstSlash = path.indexOf("/", 1);
+      const commitSha = path.slice(1, firstSlash);
+
+      let list = byCommit.get(commitSha);
+      if (!list) {
+        list = [];
+        byCommit.set(commitSha, list);
+      }
+      list.push({ id: commentId, thread });
+    }
+
+    for (const [commitSha, entries] of byCommit) {
+      const data = await readCommitReview(this.repoRoot, commitSha);
+      if (!data) continue;
+
+      for (const { id, thread } of entries) {
+        const comment = data.comments.find((c) => c.id === id);
+        if (!comment) continue;
+
+        // Update comments in the thread
+        thread.comments = comment.thread.map((entry) =>
+          this.makeVsComment(entry.body, entry.author)
+        );
+
+        // Update status
+        thread.contextValue = comment.status;
+        if (comment.status === "addressed" || comment.status === "resolved") {
+          thread.state = vscode.CommentThreadState.Resolved;
+        } else {
+          thread.state = vscode.CommentThreadState.Unresolved;
+        }
+      }
+    }
+  }
+
   clearThreads(): void {
     for (const thread of this.threads.values()) {
       thread.dispose();
