@@ -92,6 +92,12 @@
         "category": "AI Code Review"
       },
       {
+        "command": "aiCodeReview.refreshAll",
+        "title": "Refresh All (Comments + Threads)",
+        "icon": "$(refresh)",
+        "category": "AI Code Review"
+      },
+      {
         "command": "aiCodeReview.openCommentInDiff",
         "title": "Open in Diff",
         "category": "AI Code Review"
