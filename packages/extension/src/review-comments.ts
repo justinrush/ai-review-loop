@@ -10,11 +10,14 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { SCHEME } from "./diff-provider.js";
 
+export type SessionProvider = () => Promise<{ id: string } | null>;
+
 export class ReviewCommentController implements vscode.Disposable {
   private controller: vscode.CommentController;
   private repoRoot: string;
   private activeSessionId: string | null = null;
   private threads = new Map<string, vscode.CommentThread>();
+  private sessionProvider: SessionProvider | null = null;
 
   constructor(repoRoot: string) {
     this.repoRoot = repoRoot;
@@ -35,10 +38,23 @@ export class ReviewCommentController implements vscode.Disposable {
     this.activeSessionId = sessionId;
   }
 
+  setSessionProvider(provider: SessionProvider): void {
+    this.sessionProvider = provider;
+  }
+
+  private async ensureSession(): Promise<boolean> {
+    if (this.activeSessionId) return true;
+    if (!this.sessionProvider) return false;
+    const session = await this.sessionProvider();
+    if (!session) return false;
+    this.activeSessionId = session.id;
+    return true;
+  }
+
   async createComment(reply: vscode.CommentReply): Promise<void> {
-    if (!this.activeSessionId) {
+    if (!(await this.ensureSession())) {
       vscode.window.showWarningMessage(
-        "Start a review session before adding comments."
+        "Could not start a review session. Are you on a feature branch?"
       );
       return;
     }
@@ -159,9 +175,9 @@ export class ReviewCommentController implements vscode.Disposable {
   }
 
   async addGeneralComment(baseBranch: string): Promise<void> {
-    if (!this.activeSessionId) {
+    if (!(await this.ensureSession())) {
       vscode.window.showWarningMessage(
-        "Start a review session before adding comments."
+        "Could not start a review session. Are you on a feature branch?"
       );
       return;
     }
