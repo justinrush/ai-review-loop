@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getRepoRoot, getParentCommit } from "@ai-code-reviewer/shared";
+import { getRepoRoot, getParentCommit, getRefSha } from "@ai-code-reviewer/shared";
 import { CommitsTreeProvider, type CommitItem } from "./commits-tree.js";
 import { FilesTreeProvider, type FileItem } from "./files-tree.js";
 import { CommentsTreeProvider } from "./comments-tree.js";
@@ -54,6 +54,18 @@ export async function activate(
     vscode.workspace.registerTextDocumentContentProvider(SCHEME, diffProvider)
   );
 
+  // Wire up auto-start: when the user creates a comment with no active session,
+  // automatically start one instead of requiring a manual "Start Session" click.
+  commentController.setSessionProvider(async () => {
+    const session = await sessionManager.startSession();
+    if (session) {
+      vscode.commands.executeCommand("setContext", "aiCodeReview.hasActiveSession", true);
+      await commitsTree.refresh();
+      await commentsTree.refresh();
+    }
+    return session;
+  });
+
   // Watch for git notes changes to auto-refresh.
   // Watch both loose refs and packed-refs (git may update either).
   const refreshAll = () => {
@@ -71,6 +83,24 @@ export async function activate(
   gitNotesWatcher.onDidCreate(refreshAll);
   gitNotesWatcher.onDidDelete(refreshAll);
   packedRefsWatcher.onDidChange(refreshAll);
+
+  // Polling fallback: VS Code file watchers are unreliable for .git/ internals.
+  // Poll git notes ref SHAs every 3 seconds to catch changes the watchers miss.
+  let lastReviewRef: string | null = null;
+  let lastSessionsRef: string | null = null;
+  const pollTimer = setInterval(async () => {
+    try {
+      const reviewRef = await getRefSha(repoRoot, "refs/notes/code-review");
+      const sessionsRef = await getRefSha(repoRoot, "refs/notes/code-review-sessions");
+      if (reviewRef !== lastReviewRef || sessionsRef !== lastSessionsRef) {
+        lastReviewRef = reviewRef;
+        lastSessionsRef = sessionsRef;
+        refreshAll();
+      }
+    } catch {
+      // Ignore polling errors
+    }
+  }, 3000);
 
   // Track selected commit for file tree
   let selectedCommit: CommitItem | null = null;
@@ -269,7 +299,8 @@ export async function activate(
     commentsView,
     commentController,
     gitNotesWatcher,
-    packedRefsWatcher
+    packedRefsWatcher,
+    { dispose: () => clearInterval(pollTimer) }
   );
 }
 

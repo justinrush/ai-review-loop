@@ -102,3 +102,15 @@ export async function getParentCommit(
 ): Promise<string> {
   return git(["rev-parse", `${sha}^`], cwd);
 }
+
+/** Return the current SHA of a git ref, or null if it doesn't exist. */
+export async function getRefSha(
+  cwd: string,
+  ref: string
+): Promise<string | null> {
+  try {
+    return await git(["rev-parse", ref], cwd);
+  } catch {
+    return null;
+  }
+}

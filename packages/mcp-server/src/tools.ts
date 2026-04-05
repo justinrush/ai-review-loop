@@ -34,7 +34,7 @@ export function registerTools(server: McpServer): void {
         return { content: [{ type: "text" as const, text: "No merge base found. Are you on a feature branch?" }] };
       }
 
-      const session = await findActiveSession(cwd, mergeBase);
+      let session = await findActiveSession(cwd, mergeBase);
       if (!session) {
         return { content: [{ type: "text" as const, text: "No active review session found." }] };
       }
@@ -43,6 +43,15 @@ export function registerTools(server: McpServer): void {
       const open = comments.filter((c) => c.status === "open");
       const addressed = comments.filter((c) => c.status === "addressed");
       const resolved = comments.filter((c) => c.status === "resolved");
+
+      // Auto-submit: when the AI agent reads the review and there are open
+      // comments, transition from in_progress → changes_requested so the
+      // human doesn't need to explicitly click "Submit Review".
+      if (session.status === "in_progress" && open.length > 0) {
+        session = await updateSession(cwd, mergeBase, session.id, {
+          status: "changes_requested",
+        });
+      }
 
       const summary = {
         session: {

@@ -149,7 +149,7 @@
         },
         {
           "command": "aiCodeReview.addGeneralComment",
-          "when": "view == aiCodeReview.commits && aiCodeReview.hasActiveSession",
+          "when": "view == aiCodeReview.commits",
           "group": "navigation@3"
         },
         {
