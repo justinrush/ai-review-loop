@@ -1,0 +1,50 @@
+name: Build & Attach Release Assets
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all packages
+        run: npm run build
+
+      - name: Package VS Code extension
+        run: npm run package -w packages/extension
+
+      - name: Package MCP server
+        run: |
+          cd packages/mcp-server
+          tar -czf ../../mcp-server.tar.gz dist/ package.json
+
+      - name: Package skill and prompt files
+        run: |
+          tar -czf skill-prompts.tar.gz \
+            .claude/commands/process-review-feedback.md \
+            .codex/prompts/process-review-feedback.md
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VSIX=$(ls packages/extension/*.vsix)
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "$VSIX" \
+            mcp-server.tar.gz \
+            skill-prompts.tar.gz \
+            --clobber

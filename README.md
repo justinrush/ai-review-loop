@@ -33,43 +33,84 @@ so it travels with the repo and requires no external services.
 - VS Code >= 1.95
 - Git
 
-### Install
+### Install from Release (Recommended)
+
+Download the latest release from the
+[Releases page](../../releases/latest). Each release includes:
+
+- **`ai-code-reviewer-X.Y.Z.vsix`** — VS Code extension
+- **`mcp-server.tar.gz`** — MCP server for AI agents
+- **`skill-prompts.tar.gz`** — Claude Code skill and Codex prompt
+
+**1. Install the VS Code extension:**
 
 ```bash
-git clone <repo-url>
-cd ai-code-reviewer
+code --install-extension ai-code-reviewer-*.vsix
+```
+
+**2. Set up the MCP server:**
+
+```bash
+# Extract to a permanent location
+mkdir -p ~/.ai-code-reviewer/mcp-server
+tar -xzf mcp-server.tar.gz -C ~/.ai-code-reviewer/mcp-server
+cd ~/.ai-code-reviewer/mcp-server && npm install --omit=dev
+```
+
+Then register it with your AI agent (see
+[Connect the MCP Server](#connect-the-mcp-server-to-your-ai-agent)
+below).
+
+**3. Install the skill/prompt files:**
+
+```bash
+tar -xzf skill-prompts.tar.gz
+# Claude Code
+mkdir -p ~/.claude/commands
+cp .claude/commands/process-review-feedback.md ~/.claude/commands/
+
+# Codex (optional)
+mkdir -p ~/.codex/prompts
+cp .codex/prompts/process-review-feedback.md ~/.codex/prompts/
+```
+
+### Install from Source
+
+```bash
+git clone https://github.com/justinrush/ai-review-loop.git
+cd ai-review-loop
 npm install
 npm run build
 ```
 
-### Load the Extension in VS Code
-
-Press **F5** in VS Code (with this repo open) to launch an
-Extension Development Host, or package and install manually:
+Optionally package and install the VS Code extension:
 
 ```bash
 cd packages/extension
 npm run package
-code --install-extension ai-code-reviewer-0.1.0.vsix
+code --install-extension ai-code-reviewer-*.vsix
 ```
-
-> **Note:** The extension uses esbuild to bundle everything into a
-> single file. The `package` script passes `--no-dependencies` to
-> `vsce` because npm workspaces cause `vsce` to traverse symlinks
-> outside the package directory.
 
 ### Connect the MCP Server to Your AI Agent
 
 **Claude Code:**
 
 ```bash
-claude mcp add code-reviewer -- node /absolute/path/to/ai-code-reviewer/packages/mcp-server/dist/index.js
+# If installed from release:
+claude mcp add code-reviewer -- node ~/.ai-code-reviewer/mcp-server/dist/index.js
+
+# If installed from source:
+claude mcp add code-reviewer -- node /absolute/path/to/ai-review-loop/packages/mcp-server/dist/index.js
 ```
 
 **Codex:**
 
 ```bash
-codex mcp add code-reviewer -- node /absolute/path/to/ai-code-reviewer/packages/mcp-server/dist/index.js
+# If installed from release:
+codex mcp add code-reviewer -- node ~/.ai-code-reviewer/mcp-server/dist/index.js
+
+# If installed from source:
+codex mcp add code-reviewer -- node /absolute/path/to/ai-review-loop/packages/mcp-server/dist/index.js
 ```
 
 The MCP server exposes these tools to the agent:
