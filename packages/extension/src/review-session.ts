@@ -13,7 +13,7 @@ import {
   type ReviewSession,
   type ReviewComment,
   type CommitReviewData,
-} from "@ai-code-reviewer/shared";
+} from "@ai-review-loop/shared";
 import { v4 as uuidv4 } from "uuid";
 
 export class ReviewSessionManager {
@@ -26,13 +26,13 @@ export class ReviewSessionManager {
       vscode.StatusBarAlignment.Left,
       100
     );
-    this.statusBarItem.command = "aiCodeReview.submitReview";
+    this.statusBarItem.command = "aiReviewLoop.submitReview";
   }
 
   async getBaseBranch(): Promise<string> {
     return (
       vscode.workspace
-        .getConfiguration("aiCodeReview")
+        .getConfiguration("aiReviewLoop")
         .get<string>("baseBranch") ?? "main"
     );
   }
@@ -218,7 +218,7 @@ export class ReviewSessionManager {
 
     // For each new commit, check which files it touches and carry forward comments
     const { getChangedFiles, getFileAtRef } = await import(
-      "@ai-code-reviewer/shared"
+      "@ai-review-loop/shared"
     );
 
     for (const newSha of newShas) {

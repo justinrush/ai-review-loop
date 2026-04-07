@@ -3,7 +3,7 @@ import {
   getChangedFiles,
   getChangedFilesBetween,
   type ChangedFile,
-} from "@ai-code-reviewer/shared";
+} from "@ai-review-loop/shared";
 import type { CommitItem } from "./commits-tree.js";
 
 export interface FileItem {
@@ -62,7 +62,7 @@ export class FilesTreeProvider implements vscode.TreeDataProvider<FileItem> {
         ? `(from ${element.file.oldPath})`
         : undefined;
     item.command = {
-      command: "aiCodeReview.openDiff",
+      command: "aiReviewLoop.openDiff",
       title: "Open Diff",
       arguments: [element],
     };

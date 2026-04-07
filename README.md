@@ -1,4 +1,4 @@
-# AI Code Reviewer
+# AI Review Loop
 
 A VS Code extension that provides a GitLab-MR-style code review
 experience for AI-generated commits. Browse commits on a feature
@@ -11,7 +11,7 @@ The agent rebases/amends but never pushes -- the human always pushes.
 ## How It Works
 
 1. You create a feature branch and let an AI agent generate commits
-2. Open VS Code -- the **AI Code Review** sidebar shows commits
+2. Open VS Code -- the **AI Review Loop** sidebar shows commits
    since the branch diverged from main
 3. Click commits to see changed files, click files to see diffs
 4. Leave line-level comments directly in the diff using the native
@@ -38,23 +38,23 @@ so it travels with the repo and requires no external services.
 Download the latest release from the
 [Releases page](../../releases/latest). Each release includes:
 
-- **`ai-code-reviewer-X.Y.Z.vsix`** — VS Code extension
+- **`ai-review-loop-X.Y.Z.vsix`** — VS Code extension
 - **`mcp-server.tar.gz`** — MCP server for AI agents
 - **`skill-prompts.tar.gz`** — Claude Code skill and Codex prompt
 
 **1. Install the VS Code extension:**
 
 ```bash
-code --install-extension ai-code-reviewer-*.vsix
+code --install-extension ai-review-loop-*.vsix
 ```
 
 **2. Set up the MCP server:**
 
 ```bash
-# Extract to a permanent location
-mkdir -p ~/.ai-code-reviewer/mcp-server
-tar -xzf mcp-server.tar.gz -C ~/.ai-code-reviewer/mcp-server
-cd ~/.ai-code-reviewer/mcp-server && npm install --omit=dev
+# Extract to a permanent location. The bundled tarball is self-contained,
+# so no `npm install` is needed.
+mkdir -p ~/.ai-review-loop/mcp-server
+tar -xzf mcp-server.tar.gz -C ~/.ai-review-loop/mcp-server
 ```
 
 Then register it with your AI agent (see
@@ -88,7 +88,7 @@ Optionally package and install the VS Code extension:
 ```bash
 cd packages/extension
 npm run package
-code --install-extension ai-code-reviewer-*.vsix
+code --install-extension ai-review-loop-*.vsix
 ```
 
 ### Connect the MCP Server to Your AI Agent
@@ -97,20 +97,20 @@ code --install-extension ai-code-reviewer-*.vsix
 
 ```bash
 # If installed from release:
-claude mcp add code-reviewer -- node ~/.ai-code-reviewer/mcp-server/dist/index.js
+claude mcp add ai-review-loop -- node ~/.ai-review-loop/mcp-server/dist/index.js
 
 # If installed from source:
-claude mcp add code-reviewer -- node /absolute/path/to/ai-review-loop/packages/mcp-server/dist/index.js
+claude mcp add ai-review-loop -- node /absolute/path/to/ai-review-loop/packages/mcp-server/dist/index.js
 ```
 
 **Codex:**
 
 ```bash
 # If installed from release:
-codex mcp add code-reviewer -- node ~/.ai-code-reviewer/mcp-server/dist/index.js
+codex mcp add ai-review-loop -- node ~/.ai-review-loop/mcp-server/dist/index.js
 
 # If installed from source:
-codex mcp add code-reviewer -- node /absolute/path/to/ai-review-loop/packages/mcp-server/dist/index.js
+codex mcp add ai-review-loop -- node /absolute/path/to/ai-review-loop/packages/mcp-server/dist/index.js
 ```
 
 The MCP server exposes these tools to the agent:
@@ -129,8 +129,8 @@ The MCP server exposes these tools to the agent:
 
 1. Check out a feature branch that is ahead of your base branch
    (default: `main`)
-2. Open the **AI Code Review** panel in the activity bar
-3. Run **AI Code Review: Start Review Session** from the command
+2. Open the **AI Review Loop** panel in the activity bar
+3. Run **AI Review Loop: Start Review Session** from the command
    palette (`Cmd+Shift+P`)
 
 ### Reviewing Commits
@@ -151,7 +151,7 @@ The MCP server exposes these tools to the agent:
 
 ### Submitting a Review
 
-Run **AI Code Review: Submit Review** from the command palette.
+Run **AI Review Loop: Submit Review** from the command palette.
 
 - If there are open comments, the session status is set to
   `changes_requested`
@@ -170,7 +170,7 @@ as it goes. The extension auto-refreshes when git notes change.
 ### Re-Review After Rebase
 
 If the agent rebases or amends commits, run
-**AI Code Review: Re-review (After Rebase)** from the command
+**AI Review Loop: Re-review (After Rebase)** from the command
 palette. This:
 
 - Detects the new commit SHAs
@@ -184,15 +184,15 @@ palette. This:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `aiCodeReview.baseBranch` | `main` | Base branch to compare against |
+| `aiReviewLoop.baseBranch` | `main` | Base branch to compare against |
 
-You can also run **AI Code Review: Set Base Branch** from the
+You can also run **AI Review Loop: Set Base Branch** from the
 command palette.
 
 ## Project Structure
 
 ```
-ai-code-reviewer/
+ai-review-loop/
   package.json                    # npm workspaces monorepo
   tsconfig.base.json
   packages/

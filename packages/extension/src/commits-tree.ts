@@ -3,7 +3,7 @@ import {
   getCommitsBetween,
   getCurrentBranch,
   getMergeBase,
-} from "@ai-code-reviewer/shared";
+} from "@ai-review-loop/shared";
 
 export interface CommitItem {
   sha: string;
@@ -85,7 +85,7 @@ export class CommitsTreeProvider
       item.tooltip = "View all files changed across the entire branch";
       item.iconPath = new vscode.ThemeIcon("git-merge");
       item.command = {
-        command: "aiCodeReview.selectCommit",
+        command: "aiReviewLoop.selectCommit",
         title: "Select Branch Overview",
         arguments: [element],
       };
@@ -101,7 +101,7 @@ export class CommitsTreeProvider
     item.tooltip = `${element.sha}\n${element.date}\n${element.subject}`;
     item.iconPath = new vscode.ThemeIcon("git-commit");
     item.command = {
-      command: "aiCodeReview.selectCommit",
+      command: "aiReviewLoop.selectCommit",
       title: "Select Commit",
       arguments: [element],
     };

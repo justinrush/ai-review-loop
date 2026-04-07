@@ -1,4 +1,4 @@
-# AI Code Reviewer
+# AI Review Loop
 
 ## Project Structure
 

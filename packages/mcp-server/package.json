@@ -1,17 +1,17 @@
 {
-  "name": "@ai-code-reviewer/mcp-server",
+  "name": "@ai-review-loop/mcp-server",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
   "bin": {
-    "ai-code-reviewer-mcp": "dist/index.js"
+    "ai-review-loop-mcp": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
     "bundle": "esbuild src/index.ts --bundle --outfile=dist/bundle.js --platform=node --format=cjs"
   },
   "dependencies": {
-    "@ai-code-reviewer/shared": "*",
+    "@ai-review-loop/shared": "*",
     "@modelcontextprotocol/sdk": "^1.12.1"
   },
   "devDependencies": {

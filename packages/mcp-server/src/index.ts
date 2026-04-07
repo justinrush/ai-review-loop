@@ -5,7 +5,7 @@ import { registerTools } from "./tools.js";
 
 async function main(): Promise<void> {
   const server = new McpServer({
-    name: "ai-code-reviewer",
+    name: "ai-review-loop",
     version: "0.1.0",
   });
 

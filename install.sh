@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# AI Code Reviewer — Install Script
+# AI Review Loop — Install Script
 # Installs: VS Code extension, Claude Code MCP server + skill, Codex prompt + MCP server
 # Safe to run multiple times (idempotent).
 
@@ -11,7 +11,7 @@ CLAUDE_COMMANDS_DIR="$CLAUDE_DIR/commands"
 CODEX_DIR="$HOME/.codex"
 CODEX_PROMPTS_DIR="$CODEX_DIR/prompts"
 MCP_SERVER_ENTRY="$SCRIPT_DIR/packages/mcp-server/dist/index.js"
-MCP_SERVER_NAME="code-reviewer"
+MCP_SERVER_NAME="ai-review-loop"
 SKILL_SRC="$SCRIPT_DIR/.claude/commands/process-review-feedback.md"
 SKILL_DST="$CLAUDE_COMMANDS_DIR/process-review-feedback.md"
 CODEX_PROMPT_SRC="$SCRIPT_DIR/.codex/prompts/process-review-feedback.md"

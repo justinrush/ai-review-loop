@@ -38,7 +38,6 @@ jobs:
           chmod +x release-staging/dist/index.js
           node -e "
             const p = require('./package.json');
-            delete p.dependencies['@ai-code-reviewer/shared'];
             // Bundled file has all deps inlined, so drop them entirely.
             delete p.dependencies;
             delete p.devDependencies;

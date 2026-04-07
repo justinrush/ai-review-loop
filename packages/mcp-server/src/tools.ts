@@ -11,11 +11,11 @@ import {
   updateSession,
   getFileAtRef,
   getRepoRoot,
-} from "@ai-code-reviewer/shared";
-import type { ReviewComment, CommitReviewData } from "@ai-code-reviewer/shared";
+} from "@ai-review-loop/shared";
+import type { ReviewComment, CommitReviewData } from "@ai-review-loop/shared";
 
 function getCwd(): string {
-  return process.env.AI_CODE_REVIEWER_CWD || process.cwd();
+  return process.env.AI_REVIEW_LOOP_CWD || process.cwd();
 }
 
 export function registerTools(server: McpServer): void {
@@ -26,7 +26,7 @@ export function registerTools(server: McpServer): void {
     async () => {
       const cwd = getCwd();
       const branch = await getCurrentBranch(cwd);
-      const baseBranch = process.env.AI_CODE_REVIEWER_BASE_BRANCH || "main";
+      const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
       let mergeBase: string;
       try {
         mergeBase = await getMergeBase(cwd, branch, baseBranch);
@@ -92,7 +92,7 @@ export function registerTools(server: McpServer): void {
     async ({ status_filter }) => {
       const cwd = getCwd();
       const branch = await getCurrentBranch(cwd);
-      const baseBranch = process.env.AI_CODE_REVIEWER_BASE_BRANCH || "main";
+      const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
       const mergeBase = await getMergeBase(cwd, branch, baseBranch);
       const session = await findActiveSession(cwd, mergeBase);
 
@@ -138,7 +138,7 @@ export function registerTools(server: McpServer): void {
     async ({ comment_id }) => {
       const cwd = getCwd();
       const branch = await getCurrentBranch(cwd);
-      const baseBranch = process.env.AI_CODE_REVIEWER_BASE_BRANCH || "main";
+      const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
       const mergeBase = await getMergeBase(cwd, branch, baseBranch);
       const session = await findActiveSession(cwd, mergeBase);
 
@@ -178,7 +178,7 @@ export function registerTools(server: McpServer): void {
     async ({ comment_id, body }) => {
       const cwd = getCwd();
       const branch = await getCurrentBranch(cwd);
-      const baseBranch = process.env.AI_CODE_REVIEWER_BASE_BRANCH || "main";
+      const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
       const mergeBase = await getMergeBase(cwd, branch, baseBranch);
       const session = await findActiveSession(cwd, mergeBase);
 
@@ -225,7 +225,7 @@ export function registerTools(server: McpServer): void {
     async ({ comment_id, context_lines }) => {
       const cwd = getCwd();
       const branch = await getCurrentBranch(cwd);
-      const baseBranch = process.env.AI_CODE_REVIEWER_BASE_BRANCH || "main";
+      const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
       const mergeBase = await getMergeBase(cwd, branch, baseBranch);
       const session = await findActiveSession(cwd, mergeBase);
 
