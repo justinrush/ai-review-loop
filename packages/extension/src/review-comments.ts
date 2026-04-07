@@ -6,7 +6,7 @@ import {
   readCommitReview,
   writeCommitReview,
   type ReviewComment,
-} from "@ai-code-reviewer/shared";
+} from "@ai-review-loop/shared";
 import { v4 as uuidv4 } from "uuid";
 import { SCHEME } from "./diff-provider.js";
 
@@ -22,8 +22,8 @@ export class ReviewCommentController implements vscode.Disposable {
   constructor(repoRoot: string) {
     this.repoRoot = repoRoot;
     this.controller = vscode.comments.createCommentController(
-      "aiReview",
-      "AI Code Review"
+      "aiReviewLoop",
+      "AI Review Loop"
     );
 
     this.controller.commentingRangeProvider = {

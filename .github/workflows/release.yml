@@ -27,10 +27,24 @@ jobs:
       - name: Package VS Code extension
         run: npm run package -w packages/extension
 
+      - name: Bundle MCP server
+        run: npm run bundle -w packages/mcp-server
+
       - name: Package MCP server
         run: |
           cd packages/mcp-server
-          tar -czf ../../mcp-server.tar.gz dist/ package.json
+          mkdir -p release-staging/dist
+          cp dist/bundle.js release-staging/dist/index.js
+          chmod +x release-staging/dist/index.js
+          node -e "
+            const p = require('./package.json');
+            // Bundled file has all deps inlined, so drop them entirely.
+            delete p.dependencies;
+            delete p.devDependencies;
+            delete p.scripts;
+            require('fs').writeFileSync('release-staging/package.json', JSON.stringify(p, null, 2));
+          "
+          tar -czf ../../mcp-server.tar.gz -C release-staging .
 
       - name: Package skill and prompt files
         run: |

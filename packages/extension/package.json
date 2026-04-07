@@ -1,12 +1,12 @@
 {
-  "name": "ai-code-reviewer",
-  "displayName": "AI Code Reviewer",
+  "name": "ai-review-loop",
+  "displayName": "AI Review Loop",
   "description": "GitLab-MR-style code review for AI-generated commits",
   "version": "0.1.0",
-  "publisher": "ai-code-reviewer",
+  "publisher": "ai-review-loop",
   "repository": {
     "type": "git",
-    "url": "https://github.com/justinrush/ai-code-reviewer"
+    "url": "https://github.com/justinrush/ai-review-loop"
   },
   "license": "MIT",
   "engines": {
@@ -26,7 +26,7 @@
     "vscode:prepublish": "cd ../.. && npm run build -w packages/shared && cd packages/extension && npm run build"
   },
   "devDependencies": {
-    "@ai-code-reviewer/shared": "*",
+    "@ai-review-loop/shared": "*",
     "@types/uuid": "^10.0.0",
     "@types/vscode": "^1.95.0",
     "@vscode/vsce": "^3.7.1",
@@ -38,169 +38,147 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "ai-code-review",
-          "title": "AI Code Review",
+          "id": "ai-review-loop",
+          "title": "AI Review Loop",
           "icon": "resources/icon.svg"
         }
       ]
     },
     "views": {
-      "ai-code-review": [
+      "ai-review-loop": [
         {
-          "id": "aiCodeReview.commits",
+          "id": "aiReviewLoop.commits",
           "name": "Commits"
         },
         {
-          "id": "aiCodeReview.files",
+          "id": "aiReviewLoop.files",
           "name": "Changed Files"
         },
         {
-          "id": "aiCodeReview.comments",
+          "id": "aiReviewLoop.comments",
           "name": "Comments"
         }
       ]
     },
     "commands": [
       {
-        "command": "aiCodeReview.startSession",
-        "title": "Start Review Session",
-        "icon": "$(play)",
-        "category": "AI Code Review"
-      },
-      {
-        "command": "aiCodeReview.submitReview",
-        "title": "Submit Review",
-        "icon": "$(check)",
-        "category": "AI Code Review"
-      },
-      {
-        "command": "aiCodeReview.reReview",
+        "command": "aiReviewLoop.reReview",
         "title": "Re-review (After Rebase)",
         "icon": "$(sync)",
-        "category": "AI Code Review"
+        "category": "AI Review Loop"
       },
       {
-        "command": "aiCodeReview.refreshCommits",
+        "command": "aiReviewLoop.refreshCommits",
         "title": "Refresh",
         "icon": "$(refresh)",
-        "category": "AI Code Review"
+        "category": "AI Review Loop"
       },
       {
-        "command": "aiCodeReview.refreshComments",
+        "command": "aiReviewLoop.refreshComments",
         "title": "Refresh Comments",
         "icon": "$(refresh)",
-        "category": "AI Code Review"
+        "category": "AI Review Loop"
       },
       {
-        "command": "aiCodeReview.refreshAll",
+        "command": "aiReviewLoop.refreshAll",
         "title": "Refresh All (Comments + Threads)",
         "icon": "$(refresh)",
-        "category": "AI Code Review"
+        "category": "AI Review Loop"
       },
       {
-        "command": "aiCodeReview.openCommentInDiff",
+        "command": "aiReviewLoop.openCommentInDiff",
         "title": "Open in Diff",
-        "category": "AI Code Review"
+        "category": "AI Review Loop"
       },
       {
-        "command": "aiCodeReview.addComment",
+        "command": "aiReviewLoop.addComment",
         "title": "Add Review Comment",
-        "category": "AI Code Review"
+        "category": "AI Review Loop"
       },
       {
-        "command": "aiCodeReview.addGeneralComment",
+        "command": "aiReviewLoop.addGeneralComment",
         "title": "Add General Comment",
         "icon": "$(comment)",
-        "category": "AI Code Review"
+        "category": "AI Review Loop"
       },
       {
-        "command": "aiCodeReview.setBaseBranch",
+        "command": "aiReviewLoop.setBaseBranch",
         "title": "Set Base Branch",
-        "category": "AI Code Review"
+        "category": "AI Review Loop"
       },
       {
-        "command": "aiCodeReview.createComment",
+        "command": "aiReviewLoop.createComment",
         "title": "Save Comment",
-        "category": "AI Code Review",
+        "category": "AI Review Loop",
         "enablement": "!commentIsEmpty"
       },
       {
-        "command": "aiCodeReview.resolveComment",
+        "command": "aiReviewLoop.resolveComment",
         "title": "Resolve",
-        "category": "AI Code Review"
+        "category": "AI Review Loop"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "aiCodeReview.startSession",
-          "when": "view == aiCodeReview.commits && !aiCodeReview.hasActiveSession",
-          "group": "navigation@1"
-        },
-        {
-          "command": "aiCodeReview.submitReview",
-          "when": "view == aiCodeReview.commits && aiCodeReview.hasActiveSession",
-          "group": "navigation@1"
-        },
-        {
-          "command": "aiCodeReview.reReview",
-          "when": "view == aiCodeReview.commits && aiCodeReview.hasActiveSession",
+          "command": "aiReviewLoop.reReview",
+          "when": "view == aiReviewLoop.commits && aiReviewLoop.hasActiveSession",
           "group": "navigation@2"
         },
         {
-          "command": "aiCodeReview.addGeneralComment",
-          "when": "view == aiCodeReview.commits",
+          "command": "aiReviewLoop.addGeneralComment",
+          "when": "view == aiReviewLoop.commits",
           "group": "navigation@3"
         },
         {
-          "command": "aiCodeReview.refreshCommits",
-          "when": "view == aiCodeReview.commits",
+          "command": "aiReviewLoop.refreshCommits",
+          "when": "view == aiReviewLoop.commits",
           "group": "navigation@4"
         },
         {
-          "command": "aiCodeReview.refreshComments",
-          "when": "view == aiCodeReview.comments",
+          "command": "aiReviewLoop.refreshComments",
+          "when": "view == aiReviewLoop.comments",
           "group": "navigation"
         }
       ],
       "editor/lineNumber/context": [
         {
-          "command": "aiCodeReview.addComment",
-          "when": "resourceScheme == ai-review"
+          "command": "aiReviewLoop.addComment",
+          "when": "resourceScheme == ai-review-loop"
         }
       ],
       "comments/commentThread/comment": [
         {
-          "command": "aiCodeReview.createComment",
+          "command": "aiReviewLoop.createComment",
           "group": "inline",
-          "when": "commentController == aiReview"
+          "when": "commentController == aiReviewLoop"
         }
       ],
       "comments/commentThread/context": [
         {
-          "command": "aiCodeReview.createComment",
+          "command": "aiReviewLoop.createComment",
           "group": "inline",
-          "when": "commentController == aiReview && commentThreadIsEmpty"
+          "when": "commentController == aiReviewLoop && commentThreadIsEmpty"
         },
         {
-          "command": "aiCodeReview.resolveComment",
+          "command": "aiReviewLoop.resolveComment",
           "group": "inline",
-          "when": "commentController == aiReview && !commentThreadIsEmpty"
+          "when": "commentController == aiReviewLoop && !commentThreadIsEmpty"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "aiCodeReview.addComment",
+        "command": "aiReviewLoop.addComment",
         "key": "ctrl+shift+r",
         "mac": "cmd+shift+r",
-        "when": "editorTextFocus && resourceScheme == ai-review"
+        "when": "editorTextFocus && resourceScheme == ai-review-loop"
       }
     ],
     "configuration": {
-      "title": "AI Code Review",
+      "title": "AI Review Loop",
       "properties": {
-        "aiCodeReview.baseBranch": {
+        "aiReviewLoop.baseBranch": {
           "type": "string",
           "default": "main",
           "description": "The base branch to compare against (e.g. main, master, develop)"

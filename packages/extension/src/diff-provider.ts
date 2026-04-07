@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { getFileAtRef } from "@ai-code-reviewer/shared";
+import { getFileAtRef } from "@ai-review-loop/shared";
 
-export const SCHEME = "ai-review";
+export const SCHEME = "ai-review-loop";
 
 /**
  * Provides file content at specific git refs for the diff viewer.

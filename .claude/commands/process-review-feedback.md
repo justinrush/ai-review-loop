@@ -1,4 +1,4 @@
-Process review feedback from the AI Code Review VS Code extension.
+Process review feedback from the AI Review Loop VS Code extension.
 
 ## Steps
 

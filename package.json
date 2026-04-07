@@ -1,8 +1,8 @@
 {
-  "name": "ai-code-reviewer",
+  "name": "ai-review-loop",
   "version": "0.1.0",
   "repository": {
-    "url": "https://github.com/justinrush/ai-code-reviewer"
+    "url": "https://github.com/justinrush/ai-review-loop"
   },
   "private": true,
   "workspaces": [

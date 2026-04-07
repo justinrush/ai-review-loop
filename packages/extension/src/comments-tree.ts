@@ -6,7 +6,7 @@ import {
   findActiveSession,
   getAllSessionComments,
   type ReviewComment,
-} from "@ai-code-reviewer/shared";
+} from "@ai-review-loop/shared";
 
 export type CommentTreeItem = CommentGroupItem | CommentEntryItem;
 
@@ -103,7 +103,7 @@ export class CommentsTreeProvider
 
     if (!isGeneral) {
       item.command = {
-        command: "aiCodeReview.openCommentInDiff",
+        command: "aiReviewLoop.openCommentInDiff",
         title: "Open in Diff",
         arguments: [element.comment],
       };
