@@ -1,6 +1,6 @@
 {
   "name": "ai-code-reviewer",
-  "displayName": "AI Code Reviewer",
+  "displayName": "AI Review Loop",
   "description": "GitLab-MR-style code review for AI-generated commits",
   "version": "0.1.0",
   "publisher": "ai-code-reviewer",
