@@ -192,28 +192,6 @@ export async function activate(
     ),
 
     vscode.commands.registerCommand(
-      "aiReviewLoop.startSession",
-      async () => {
-        const session = await sessionManager.startSession();
-        if (session) {
-          commentController.setActiveSessionId(session.id);
-          vscode.commands.executeCommand("setContext", "aiReviewLoop.hasActiveSession", true);
-          await commitsTree.refresh();
-          await commentsTree.refresh();
-        }
-      }
-    ),
-
-    vscode.commands.registerCommand(
-      "aiReviewLoop.submitReview",
-      async () => {
-        await sessionManager.submitReview();
-        vscode.commands.executeCommand("setContext", "aiReviewLoop.hasActiveSession", false);
-        await commentsTree.refresh();
-      }
-    ),
-
-    vscode.commands.registerCommand(
       "aiReviewLoop.reReview",
       async () => {
         const session = await sessionManager.reReview();

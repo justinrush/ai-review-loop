@@ -26,7 +26,6 @@ export class ReviewSessionManager {
       vscode.StatusBarAlignment.Left,
       100
     );
-    this.statusBarItem.command = "aiReviewLoop.submitReview";
   }
 
   async getBaseBranch(): Promise<string> {
@@ -96,41 +95,6 @@ export class ReviewSessionManager {
     );
 
     return session;
-  }
-
-  async submitReview(): Promise<void> {
-    const baseBranch = await this.getBaseBranch();
-    const branch = await getCurrentBranch(this.repoRoot);
-    const mergeBase = await getMergeBase(this.repoRoot, branch, baseBranch);
-    const session = await findActiveSession(this.repoRoot, mergeBase);
-
-    if (!session) {
-      vscode.window.showWarningMessage("No active review session to submit.");
-      return;
-    }
-
-    const comments = await getAllSessionComments(
-      this.repoRoot,
-      session.commitShas
-    );
-    const openCount = comments.filter((c) => c.status === "open").length;
-
-    if (openCount === 0) {
-      // No open comments — approve
-      await updateSession(this.repoRoot, mergeBase, session.id, {
-        status: "approved",
-      });
-      this.updateStatusBar({ ...session, status: "approved" });
-      vscode.window.showInformationMessage("Review approved! No open comments.");
-    } else {
-      await updateSession(this.repoRoot, mergeBase, session.id, {
-        status: "changes_requested",
-      });
-      this.updateStatusBar({ ...session, status: "changes_requested" });
-      vscode.window.showInformationMessage(
-        `Review submitted with ${openCount} open comment(s). The AI agent can now address them via MCP.`
-      );
-    }
   }
 
   async reReview(): Promise<ReviewSession | null> {

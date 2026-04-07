@@ -62,18 +62,6 @@
     },
     "commands": [
       {
-        "command": "aiReviewLoop.startSession",
-        "title": "Start Review Session",
-        "icon": "$(play)",
-        "category": "AI Review Loop"
-      },
-      {
-        "command": "aiReviewLoop.submitReview",
-        "title": "Submit Review",
-        "icon": "$(check)",
-        "category": "AI Review Loop"
-      },
-      {
         "command": "aiReviewLoop.reReview",
         "title": "Re-review (After Rebase)",
         "icon": "$(sync)",
@@ -132,16 +120,6 @@
     ],
     "menus": {
       "view/title": [
-        {
-          "command": "aiReviewLoop.startSession",
-          "when": "view == aiReviewLoop.commits && !aiReviewLoop.hasActiveSession",
-          "group": "navigation@1"
-        },
-        {
-          "command": "aiReviewLoop.submitReview",
-          "when": "view == aiReviewLoop.commits && aiReviewLoop.hasActiveSession",
-          "group": "navigation@1"
-        },
         {
           "command": "aiReviewLoop.reReview",
           "when": "view == aiReviewLoop.commits && aiReviewLoop.hasActiveSession",

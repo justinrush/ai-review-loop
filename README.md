@@ -129,9 +129,8 @@ The MCP server exposes these tools to the agent:
 
 1. Check out a feature branch that is ahead of your base branch
    (default: `main`)
-2. Open the **AI Review Loop** panel in the activity bar
-3. Run **AI Review Loop: Start Review Session** from the command
-   palette (`Cmd+Shift+P`)
+2. Open the **AI Review Loop** panel in the activity bar — your
+   first comment will start a review session automatically
 
 ### Reviewing Commits
 
@@ -149,23 +148,19 @@ The MCP server exposes these tools to the agent:
   `Ctrl+Shift+R` (Windows/Linux)
 - Comments are persisted to git notes immediately
 
-### Submitting a Review
-
-Run **AI Review Loop: Submit Review** from the command palette.
-
-- If there are open comments, the session status is set to
-  `changes_requested`
-- If all comments are resolved, the session is marked `approved`
-
 ### Agent Workflow
 
-After submitting, tell your AI agent to check for reviews:
+When you're done leaving comments, tell your AI agent to check
+for reviews:
 
 > "Check if there's a code review to address"
 
-The agent will call `get_active_review`, see the open comments,
-make fixes, and call `mark_comment_addressed` / `reply_to_comment`
-as it goes. The extension auto-refreshes when git notes change.
+The agent calls `get_active_review`, which automatically
+transitions the session from `in_progress` to `changes_requested`
+the first time it's read — no manual "submit" step required.
+The agent then makes fixes and calls `mark_comment_addressed` /
+`reply_to_comment` as it goes. The extension auto-refreshes when
+git notes change.
 
 ### Re-Review After Rebase
 
