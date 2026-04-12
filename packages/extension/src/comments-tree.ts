@@ -33,6 +33,8 @@ export class CommentsTreeProvider
   private comments: ReviewComment[] = [];
   private repoRoot: string;
   private baseBranch: string;
+  private branchOverride: string | null = null;
+  private activeBranch: string | null = null;
 
   constructor(repoRoot: string, baseBranch: string) {
     this.repoRoot = repoRoot;
@@ -43,9 +45,18 @@ export class CommentsTreeProvider
     this.baseBranch = branch;
   }
 
+  setBranchOverride(branch: string | null): void {
+    this.branchOverride = branch;
+  }
+
+  getActiveBranch(): string | null {
+    return this.activeBranch;
+  }
+
   async refresh(): Promise<void> {
     try {
-      const branch = await getCurrentBranch(this.repoRoot);
+      const branch = this.branchOverride ?? await getCurrentBranch(this.repoRoot);
+      this.activeBranch = branch;
       if (branch === this.baseBranch || branch === "HEAD") {
         this.comments = [];
         this._onDidChangeTreeData.fire();
@@ -56,7 +67,7 @@ export class CommentsTreeProvider
         branch,
         this.baseBranch
       );
-      const session = await findActiveSession(this.repoRoot, mergeBase);
+      const session = await findActiveSession(this.repoRoot, mergeBase, branch);
       if (!session) {
         this.comments = [];
         this._onDidChangeTreeData.fire();

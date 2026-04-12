@@ -8,6 +8,7 @@ import {
   getCommitsBetween,
   readCommitReview,
   writeCommitReview,
+  deleteCommentFromCommit,
   updateSession,
   getFileAtRef,
   getRepoRoot,
@@ -34,7 +35,7 @@ export function registerTools(server: McpServer): void {
         return { content: [{ type: "text" as const, text: "No merge base found. Are you on a feature branch?" }] };
       }
 
-      let session = await findActiveSession(cwd, mergeBase);
+      let session = await findActiveSession(cwd, mergeBase, branch);
       if (!session) {
         return { content: [{ type: "text" as const, text: "No active review session found." }] };
       }
@@ -94,7 +95,7 @@ export function registerTools(server: McpServer): void {
       const branch = await getCurrentBranch(cwd);
       const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
       const mergeBase = await getMergeBase(cwd, branch, baseBranch);
-      const session = await findActiveSession(cwd, mergeBase);
+      const session = await findActiveSession(cwd, mergeBase, branch);
 
       if (!session) {
         return { content: [{ type: "text" as const, text: "No active review session found." }] };
@@ -140,7 +141,7 @@ export function registerTools(server: McpServer): void {
       const branch = await getCurrentBranch(cwd);
       const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
       const mergeBase = await getMergeBase(cwd, branch, baseBranch);
-      const session = await findActiveSession(cwd, mergeBase);
+      const session = await findActiveSession(cwd, mergeBase, branch);
 
       if (!session) {
         return { content: [{ type: "text" as const, text: "No active review session found." }] };
@@ -169,6 +170,41 @@ export function registerTools(server: McpServer): void {
   );
 
   server.tool(
+    "delete_comment",
+    "Permanently delete a review comment",
+    {
+      comment_id: z.string().describe("The ID of the comment to delete"),
+    },
+    async ({ comment_id }) => {
+      const cwd = getCwd();
+      const branch = await getCurrentBranch(cwd);
+      const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
+      const mergeBase = await getMergeBase(cwd, branch, baseBranch);
+      const session = await findActiveSession(cwd, mergeBase, branch);
+
+      if (!session) {
+        return { content: [{ type: "text" as const, text: "No active review session found." }] };
+      }
+
+      for (const sha of session.commitShas) {
+        const deleted = await deleteCommentFromCommit(cwd, sha, comment_id);
+        if (deleted) {
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: `Comment ${comment_id} deleted.`,
+              },
+            ],
+          };
+        }
+      }
+
+      return { content: [{ type: "text" as const, text: `Comment ${comment_id} not found.` }] };
+    }
+  );
+
+  server.tool(
     "reply_to_comment",
     "Add a reply to a review comment thread",
     {
@@ -180,7 +216,7 @@ export function registerTools(server: McpServer): void {
       const branch = await getCurrentBranch(cwd);
       const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
       const mergeBase = await getMergeBase(cwd, branch, baseBranch);
-      const session = await findActiveSession(cwd, mergeBase);
+      const session = await findActiveSession(cwd, mergeBase, branch);
 
       if (!session) {
         return { content: [{ type: "text" as const, text: "No active review session found." }] };
@@ -227,7 +263,7 @@ export function registerTools(server: McpServer): void {
       const branch = await getCurrentBranch(cwd);
       const baseBranch = process.env.AI_REVIEW_LOOP_BASE_BRANCH || "main";
       const mergeBase = await getMergeBase(cwd, branch, baseBranch);
-      const session = await findActiveSession(cwd, mergeBase);
+      const session = await findActiveSession(cwd, mergeBase, branch);
 
       if (!session) {
         return { content: [{ type: "text" as const, text: "No active review session found." }] };

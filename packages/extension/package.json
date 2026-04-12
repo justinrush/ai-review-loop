@@ -116,6 +116,24 @@
         "command": "aiReviewLoop.resolveComment",
         "title": "Resolve",
         "category": "AI Review Loop"
+      },
+      {
+        "command": "aiReviewLoop.deleteComment",
+        "title": "Delete Comment",
+        "icon": "$(trash)",
+        "category": "AI Review Loop"
+      },
+      {
+        "command": "aiReviewLoop.deleteCommentFromTree",
+        "title": "Delete Comment",
+        "icon": "$(trash)",
+        "category": "AI Review Loop"
+      },
+      {
+        "command": "aiReviewLoop.selectBranch",
+        "title": "Select Branch",
+        "icon": "$(git-branch)",
+        "category": "AI Review Loop"
       }
     ],
     "menus": {
@@ -136,9 +154,14 @@
           "group": "navigation@4"
         },
         {
+          "command": "aiReviewLoop.selectBranch",
+          "when": "view == aiReviewLoop.comments",
+          "group": "navigation@1"
+        },
+        {
           "command": "aiReviewLoop.refreshComments",
           "when": "view == aiReviewLoop.comments",
-          "group": "navigation"
+          "group": "navigation@2"
         }
       ],
       "editor/lineNumber/context": [
@@ -162,8 +185,20 @@
         },
         {
           "command": "aiReviewLoop.resolveComment",
-          "group": "inline",
+          "group": "inline@1",
           "when": "commentController == aiReviewLoop && !commentThreadIsEmpty"
+        },
+        {
+          "command": "aiReviewLoop.deleteComment",
+          "group": "inline@2",
+          "when": "commentController == aiReviewLoop && !commentThreadIsEmpty"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "aiReviewLoop.deleteCommentFromTree",
+          "when": "view == aiReviewLoop.comments && viewItem == commentEntry",
+          "group": "inline"
         }
       ]
     },
