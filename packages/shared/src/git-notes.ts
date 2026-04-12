@@ -90,15 +90,17 @@ export async function writeSessions(
 
 export async function findActiveSession(
   cwd: string,
-  mergeBaseSha: string
+  mergeBaseSha: string,
+  branchName?: string
 ): Promise<ReviewSession | null> {
   const { sessions } = await readSessions(cwd, mergeBaseSha);
   return (
     sessions.find(
       (s) =>
-        s.status === "in_progress" ||
-        s.status === "submitted" ||
-        s.status === "changes_requested"
+        (s.status === "in_progress" ||
+          s.status === "submitted" ||
+          s.status === "changes_requested") &&
+        (!branchName || s.branchName === branchName)
     ) ?? null
   );
 }
@@ -119,6 +121,22 @@ export async function updateSession(
   };
   await writeSessions(cwd, mergeBaseSha, data);
   return data.sessions[idx];
+}
+
+/** Delete a comment by ID from a specific commit's review data.
+ *  Returns true if the comment was found and removed. */
+export async function deleteCommentFromCommit(
+  cwd: string,
+  commitSha: string,
+  commentId: string
+): Promise<boolean> {
+  const data = await readCommitReview(cwd, commitSha);
+  if (!data) return false;
+  const idx = data.comments.findIndex((c) => c.id === commentId);
+  if (idx === -1) return false;
+  data.comments.splice(idx, 1);
+  await writeCommitReview(cwd, commitSha, data);
+  return true;
 }
 
 /** Collect all comments across all commits in a session */

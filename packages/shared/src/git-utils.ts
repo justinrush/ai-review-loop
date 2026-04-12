@@ -103,6 +103,16 @@ export async function getParentCommit(
   return git(["rev-parse", `${sha}^`], cwd);
 }
 
+/** Return a list of local branch names. */
+export async function getLocalBranches(cwd: string): Promise<string[]> {
+  const output = await git(
+    ["for-each-ref", "--format=%(refname:short)", "refs/heads/"],
+    cwd
+  );
+  if (!output) return [];
+  return output.split("\n").filter(Boolean);
+}
+
 /** Return the current SHA of a git ref, or null if it doesn't exist. */
 export async function getRefSha(
   cwd: string,

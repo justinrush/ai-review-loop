@@ -58,7 +58,7 @@ export class ReviewSessionManager {
     }
 
     // Check for existing active session
-    const existing = await findActiveSession(this.repoRoot, mergeBase);
+    const existing = await findActiveSession(this.repoRoot, mergeBase, branch);
     if (existing) {
       vscode.window.showInformationMessage(
         `Active session already exists (${existing.status}).`
@@ -101,7 +101,7 @@ export class ReviewSessionManager {
     const baseBranch = await this.getBaseBranch();
     const branch = await getCurrentBranch(this.repoRoot);
     const mergeBase = await getMergeBase(this.repoRoot, branch, baseBranch);
-    const session = await findActiveSession(this.repoRoot, mergeBase);
+    const session = await findActiveSession(this.repoRoot, mergeBase, branch);
 
     if (!session) {
       vscode.window.showWarningMessage("No active review session to re-review.");
@@ -139,7 +139,7 @@ export class ReviewSessionManager {
     if (branch === baseBranch || branch === "HEAD") return null;
     try {
       const mergeBase = await getMergeBase(this.repoRoot, branch, baseBranch);
-      const session = await findActiveSession(this.repoRoot, mergeBase);
+      const session = await findActiveSession(this.repoRoot, mergeBase, branch);
       if (session) this.updateStatusBar(session);
       return session;
     } catch {

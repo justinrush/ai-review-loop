@@ -5,6 +5,7 @@ import {
   getCommitsBetween,
   readCommitReview,
   writeCommitReview,
+  deleteCommentFromCommit,
   type ReviewComment,
 } from "@ai-review-loop/shared";
 import { v4 as uuidv4 } from "uuid";
@@ -172,6 +173,42 @@ export class ReviewCommentController implements vscode.Disposable {
       thread.state = vscode.CommentThreadState.Resolved;
       thread.contextValue = "resolved";
     }
+  }
+
+  async deleteComment(thread: vscode.CommentThread): Promise<void> {
+    const commentId = thread.label;
+    if (!commentId) return;
+
+    const uri = thread.uri;
+    const path = uri.path;
+    const firstSlash = path.indexOf("/", 1);
+    const commitSha = path.slice(1, firstSlash);
+
+    const deleted = await deleteCommentFromCommit(
+      this.repoRoot,
+      commitSha,
+      commentId
+    );
+    if (deleted) {
+      thread.dispose();
+      this.threads.delete(commentId);
+    }
+  }
+
+  async deleteCommentById(commentId: string, commitSha: string): Promise<boolean> {
+    const deleted = await deleteCommentFromCommit(
+      this.repoRoot,
+      commitSha,
+      commentId
+    );
+    if (deleted) {
+      const thread = this.threads.get(commentId);
+      if (thread) {
+        thread.dispose();
+        this.threads.delete(commentId);
+      }
+    }
+    return deleted;
   }
 
   async addGeneralComment(baseBranch: string): Promise<void> {

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getRepoRoot, getParentCommit, getRefSha } from "@ai-review-loop/shared";
+import { getRepoRoot, getParentCommit, getRefSha, getLocalBranches, getCurrentBranch } from "@ai-review-loop/shared";
 import { CommitsTreeProvider, type CommitItem } from "./commits-tree.js";
 import { FilesTreeProvider, type FileItem } from "./files-tree.js";
 import { CommentsTreeProvider } from "./comments-tree.js";
@@ -240,8 +240,46 @@ export async function activate(
             .getConfiguration("aiReviewLoop")
             .update("baseBranch", input, vscode.ConfigurationTarget.Workspace);
           commitsTree.setBaseBranch(input);
+          commentsTree.setBaseBranch(input);
           await commitsTree.refresh();
+          await commentsTree.refresh();
         }
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "aiReviewLoop.selectBranch",
+      async () => {
+        const branches = await getLocalBranches(repoRoot);
+        const current = await getCurrentBranch(repoRoot);
+        const override = commentsTree.getActiveBranch();
+
+        const items = [
+          {
+            label: "$(git-branch) Auto-detect (current branch)",
+            description: override ? `currently: ${current}` : "(active)",
+            isAutoDetect: true,
+          },
+          ...branches
+            .filter((b) => b !== baseBranch)
+            .map((b) => ({
+              label: b,
+              description: b === override ? "(selected)" : undefined,
+              isAutoDetect: false,
+            })),
+        ];
+
+        const pick = await vscode.window.showQuickPick(items, {
+          placeHolder: "Select branch to view comments for",
+        });
+        if (!pick) return;
+
+        if (pick.isAutoDetect) {
+          commentsTree.setBranchOverride(null);
+        } else {
+          commentsTree.setBranchOverride(pick.label);
+        }
+        await commentsTree.refresh();
       }
     ),
 
@@ -254,6 +292,28 @@ export async function activate(
     vscode.commands.registerCommand(
       "aiReviewLoop.resolveComment",
       (thread: vscode.CommentThread) => commentController.resolveComment(thread)
+    ),
+
+    vscode.commands.registerCommand(
+      "aiReviewLoop.deleteComment",
+      async (thread: vscode.CommentThread) => {
+        await commentController.deleteComment(thread);
+        commentsTree.refresh();
+      }
+    ),
+
+    vscode.commands.registerCommand(
+      "aiReviewLoop.deleteCommentFromTree",
+      async (item: { kind: string; comment: import("@ai-review-loop/shared").ReviewComment }) => {
+        if (item.kind !== "entry") return;
+        const deleted = await commentController.deleteCommentById(
+          item.comment.id,
+          item.comment.commitSha
+        );
+        if (deleted) {
+          commentsTree.refresh();
+        }
+      }
     ),
 
     vscode.commands.registerCommand(
