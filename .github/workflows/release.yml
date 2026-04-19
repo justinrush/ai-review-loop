@@ -52,6 +52,15 @@ jobs:
             .claude/commands/process-review-feedback.md \
             .codex/prompts/process-review-feedback.md
 
+      - name: Package Neovim plugin
+        run: |
+          # Pure-Lua, no build step. Ship lua/, plugin/, README — drop
+          # tests/ and the npm-workspace stub package.json so the tarball
+          # extracts directly into a runtimepath dir.
+          tar -czf neovim-plugin.tar.gz \
+            -C packages/neovim \
+            lua plugin README.md
+
       - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
@@ -61,4 +70,5 @@ jobs:
             "$VSIX" \
             mcp-server.tar.gz \
             skill-prompts.tar.gz \
+            neovim-plugin.tar.gz \
             --clobber

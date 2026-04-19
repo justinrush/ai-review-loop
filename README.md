@@ -1,10 +1,12 @@
 # AI Review Loop
 
-A VS Code extension that provides a GitLab-MR-style code review
-experience for AI-generated commits. Browse commits on a feature
-branch, view diffs, leave line-level comments, submit the review,
-and have your AI agent (Claude Code or Codex) read and address
+Editor-integrated code review for AI-generated commits. Browse commits
+on a feature branch, view diffs, leave line-level comments, submit the
+review, and have your AI agent (Claude Code or Codex) read and address
 feedback via MCP tools.
+
+Editor support: **VS Code** (native extension) and **Neovim**
+(Lua plugin — see [packages/neovim/](packages/neovim/)).
 
 The agent rebases/amends but never pushes -- the human always pushes.
 
@@ -41,12 +43,31 @@ Download the latest release from the
 - **`ai-review-loop-X.Y.Z.vsix`** — VS Code extension
 - **`mcp-server.tar.gz`** — MCP server for AI agents
 - **`skill-prompts.tar.gz`** — Claude Code skill and Codex prompt
+- **`neovim-plugin.tar.gz`** — Neovim plugin (Lua, no build step)
 
-**1. Install the VS Code extension:**
+**1. Install the editor plugin**
 
-```bash
-code --install-extension ai-review-loop-*.vsix
-```
+- **VS Code:** `code --install-extension ai-review-loop-*.vsix`
+- **Neovim:** extract the plugin tarball to the canonical location
+  (mirrors where the MCP server lives, and matches the path
+  `install.sh` uses for source builds):
+  ```bash
+  mkdir -p ~/.ai-review-loop/nvim-plugin
+  tar -xzf neovim-plugin.tar.gz -C ~/.ai-review-loop/nvim-plugin
+  ```
+  Then load it with lazy.nvim:
+  ```lua
+  {
+    dir = vim.fn.expand("~/.ai-review-loop/nvim-plugin"),
+    name = "ai-review-loop.nvim",
+    cmd  = { "AIReviewList", "AIReviewAdd", "AIReviewDone",
+             "AIReviewResolve", "AIReviewReReview" },
+    keys = { { "<leader>r", desc = "review" } },
+    config = function() require("ai_review_loop").setup({}) end,
+  }
+  ```
+  See [`packages/neovim/README.md`](packages/neovim/README.md) for the
+  full keymap and command list.
 
 **2. Set up the MCP server:**
 

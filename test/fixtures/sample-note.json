@@ -1,0 +1,46 @@
+{
+  "sessionId": "fixture-session-1",
+  "comments": [
+    {
+      "id": "fixture-comment-1",
+      "sessionId": "fixture-session-1",
+      "commitSha": "0000000000000000000000000000000000000000",
+      "filePath": "src/example.go",
+      "startLine": 10,
+      "endLine": 12,
+      "body": "This function should return an error instead of panicking.",
+      "status": "open",
+      "createdAt": "2026-04-18T00:00:00Z",
+      "thread": [
+        {
+          "body": "This function should return an error instead of panicking.",
+          "author": "human",
+          "createdAt": "2026-04-18T00:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": "fixture-comment-2",
+      "sessionId": "fixture-session-1",
+      "commitSha": "0000000000000000000000000000000000000000",
+      "filePath": "src/example.go",
+      "startLine": 42,
+      "endLine": 42,
+      "body": "Nit: prefer errors.Is over string comparison.",
+      "status": "addressed",
+      "createdAt": "2026-04-18T00:01:00Z",
+      "thread": [
+        {
+          "body": "Nit: prefer errors.Is over string comparison.",
+          "author": "human",
+          "createdAt": "2026-04-18T00:01:00Z"
+        },
+        {
+          "body": "Done — switched to errors.Is.",
+          "author": "agent",
+          "createdAt": "2026-04-18T00:05:00Z"
+        }
+      ]
+    }
+  ]
+}

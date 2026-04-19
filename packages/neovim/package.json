@@ -1,0 +1,9 @@
+{
+  "name": "@ai-review-loop/neovim",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Neovim plugin for ai-review-loop (Lua)",
+  "scripts": {
+    "test": "bash ../../test/test-git-notes-lua.sh"
+  }
+}

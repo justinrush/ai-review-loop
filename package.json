@@ -8,11 +8,12 @@
   "workspaces": [
     "packages/shared",
     "packages/mcp-server",
-    "packages/extension"
+    "packages/extension",
+    "packages/neovim"
   ],
   "scripts": {
     "build": "npm run build -w packages/shared && npm run build -w packages/mcp-server && npm run build -w packages/extension",
     "clean": "rm -rf packages/shared/dist packages/mcp-server/dist packages/extension/dist",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present && bash test/test-git-notes.sh && bash test/test-git-notes-lua.sh"
   }
 }
