@@ -16,6 +16,8 @@ SKILL_SRC="$SCRIPT_DIR/.claude/commands/process-review-feedback.md"
 SKILL_DST="$CLAUDE_COMMANDS_DIR/process-review-feedback.md"
 CODEX_PROMPT_SRC="$SCRIPT_DIR/.codex/prompts/process-review-feedback.md"
 CODEX_PROMPT_DST="$CODEX_PROMPTS_DIR/process-review-feedback.md"
+NVIM_PLUGIN_SRC="$SCRIPT_DIR/packages/neovim"
+NVIM_PLUGIN_DST="$HOME/.ai-review-loop/nvim-plugin"
 
 # ─── Colors ───────────────────────────────────────────────────────────────────
 
@@ -45,6 +47,13 @@ if command -v codex >/dev/null 2>&1; then
     HAS_CODEX=true
 else
     warn "codex CLI not found — skipping Codex prompt and MCP registration"
+fi
+
+HAS_NVIM=false
+if command -v nvim >/dev/null 2>&1; then
+    HAS_NVIM=true
+else
+    warn "nvim not found — skipping Neovim plugin install"
 fi
 
 # ─── Build ────────────────────────────────────────────────────────────────────
@@ -113,6 +122,23 @@ if [ "$HAS_CODEX" = true ]; then
     info "MCP server '$MCP_SERVER_NAME' registered in Codex"
 fi
 
+# ─── Neovim plugin ──────────────────────────────────────────────────────────
+
+if [ "$HAS_NVIM" = true ]; then
+    step "Installing Neovim plugin"
+    mkdir -p "$(dirname "$NVIM_PLUGIN_DST")"
+
+    # Symlink (not copy) so source edits show up in nvim immediately —
+    # critical for iterating on the plugin during development.
+    if [ -L "$NVIM_PLUGIN_DST" ] && [ "$(readlink "$NVIM_PLUGIN_DST")" = "$NVIM_PLUGIN_SRC" ]; then
+        info "Plugin symlink already up to date"
+    else
+        rm -rf "$NVIM_PLUGIN_DST"
+        ln -s "$NVIM_PLUGIN_SRC" "$NVIM_PLUGIN_DST"
+        info "Symlinked $NVIM_PLUGIN_SRC -> $NVIM_PLUGIN_DST"
+    fi
+fi
+
 # ─── Done ─────────────────────────────────────────────────────────────────────
 
 step "Installation complete"
@@ -122,5 +148,8 @@ info "MCP server: available as '$MCP_SERVER_NAME' in Claude Code"
 if [ "$HAS_CODEX" = true ]; then
     info "Codex prompt: use /prompts:process-review-feedback in Codex"
     info "Codex MCP server: available as '$MCP_SERVER_NAME' in Codex"
+fi
+if [ "$HAS_NVIM" = true ]; then
+    info "Neovim plugin: load via lazy.nvim with dir = '$NVIM_PLUGIN_DST'"
 fi
 echo
